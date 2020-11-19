@@ -8,6 +8,10 @@ print(df.head(50))
 # Import TfIdfVectorizer from the scikit-learn library
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
+from sklearn.cluster import MiniBatchKMeans
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
 
 # Define a TF-IDF Vectorizer Object. Remove all english stopwords
 tfidf = TfidfVectorizer(stop_words='english')
@@ -60,6 +64,44 @@ def content_recommender(title, cosine_sim=cosine_sim, df=df, indices=indices):
 print(content_recommender('Emotional Intelligence'))
 
 # TODO: Group object in Clusters (UI?)
+kmeans_per_k = [MiniBatchKMeans(n_clusters=k, random_state=42).fit(cosine_sim)
+                for k in range(1, 25)]
+WCSS = [model.inertia_ for model in kmeans_per_k]
+
+print(WCSS)
+
+plt.figure()
+plt.plot(range(1, 25), WCSS)
+plt.xlabel("$k$", fontsize=14)
+plt.ylabel("WCSS", fontsize=14)
+plt.annotate('Elbow',
+             xy=(4, WCSS[3]),
+             xytext=(0.55, 0.55),
+             textcoords='figure fraction',
+             fontsize=16,
+             arrowprops=dict(facecolor='black', shrink=0.1)
+             )
+plt.axis([1, 25, 0, 100000])
+plt.show()
+
+smaller_df = TSNE().fit_transform(PCA(n_components=2).fit_transform(cosine_sim))
+print(smaller_df)
+
+k = 4
+kmeans = MiniBatchKMeans(n_clusters=k, random_state=42)
+y_pred = kmeans.fit_predict(cosine_sim)
+
+
+def plot_clusters(X, y=None):
+    plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='viridis')
+    centers = kmeans.cluster_centers_
+    plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5)
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.show()
+
+
+plot_clusters(smaller_df, y=y_pred)
 
 # TODO: Plot objects per cluster (UI)
 
