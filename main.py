@@ -12,6 +12,7 @@ from sklearn.cluster import MiniBatchKMeans
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Define a TF-IDF Vectorizer Object. Remove all english stopwords
 tfidf = TfidfVectorizer(stop_words='english')
@@ -112,7 +113,8 @@ def get_coordinates(X, plot_data, title):
     idx = X[title]
     return plot_data[idx] if (idx is not None) else [0, 0]
 
-def plot_clusters_with_target(X, target, y=None):
+
+def plot_clusters_with_target(X, target, y=None, zoom_axis=0):
     plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='viridis')
     centers = kmeans.cluster_centers_
     plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5)
@@ -121,10 +123,14 @@ def plot_clusters_with_target(X, target, y=None):
     plt.scatter(target[0], target[1], color="red")
     plt.annotate("Learning Object", (target[0], target[1]))
     plt.tight_layout()
+    if zoom_axis != 0:  # Zoom in on object (UI)
+        plt.axis([target[0]-zoom_axis, target[0]+zoom_axis, target[1]-zoom_axis, target[1]+zoom_axis])
     plt.show()
 
 
 target_point = get_coordinates(indices, smaller_df, 'Eager to help? ~ Share your expertise (WIP)')
 plot_clusters_with_target(smaller_df, target_point, y_pred)
+plot_clusters_with_target(smaller_df, target_point, y_pred, zoom_axis=30)
 
-# TODO: Zoom in on object (UI)
+
+
