@@ -103,8 +103,28 @@ def plot_clusters(X, y=None):
 
 plot_clusters(smaller_df, y=y_pred)
 
+
 # TODO: Plot objects per cluster (UI)
 
 # TODO: Create object locator (UI) (search bar)
+def get_coordinates(X, plot_data, title):
+    # Obtain the index of the movie that matches the title
+    idx = X[title]
+    return plot_data[idx] if (idx is not None) else [0, 0]
+
+def plot_clusters_with_target(X, target, y=None):
+    plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='viridis')
+    centers = kmeans.cluster_centers_
+    plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5)
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.scatter(target[0], target[1], color="red")
+    plt.annotate("Learning Object", (target[0], target[1]))
+    plt.tight_layout()
+    plt.show()
+
+
+target_point = get_coordinates(indices, smaller_df, 'Eager to help? ~ Share your expertise (WIP)')
+plot_clusters_with_target(smaller_df, target_point, y_pred)
 
 # TODO: Zoom in on object (UI)
