@@ -92,6 +92,13 @@ k = 4
 kmeans = MiniBatchKMeans(n_clusters=k, random_state=42)
 y_pred = kmeans.fit_predict(cosine_sim)
 
+SAVE = True
+if SAVE:
+    pd.DataFrame(smaller_df).to_csv("./model/coordinates.csv")
+    pd.DataFrame(y_pred).to_csv("./model/prediction.csv")
+    indices.to_csv("./model/indices.csv")
+
+# TODO: Plot objects per cluster (UI)
 
 def plot_clusters(X, y=None):
     plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='viridis')
@@ -104,8 +111,6 @@ def plot_clusters(X, y=None):
 
 plot_clusters(smaller_df, y=y_pred)
 
-
-# TODO: Plot objects per cluster (UI)
 
 # TODO: Create object locator (UI) (search bar)
 def get_coordinates(X, plot_data, title):
