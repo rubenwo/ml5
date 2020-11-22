@@ -43,7 +43,7 @@ def plot_clusters_st_alt(X, target):
         y=alt.Y('X1', scale=alt.Scale(domain=(clamp_min(y_min, -80), clamp_max(y_max, 80)))),
         # x='X0',
         # y='X1',
-        color=alt.Color('Y', scale=alt.Scale(scheme='dark2'))
+        color=alt.Color('Pred', scale=alt.Scale(scheme='dark2'))
     ).properties(
         height=800,
         width=800
