@@ -5,14 +5,11 @@ print(df.head(50))
 
 # TODO: Return top 5 recommendations with confidence level > 0.3
 
-# Import TfIdfVectorizer from the scikit-learn library
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 from sklearn.cluster import MiniBatchKMeans
-from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
-import numpy as np
 
 # Define a TF-IDF Vectorizer Object. Remove all english stopwords
 tfidf = TfidfVectorizer(stop_words='english')
@@ -64,8 +61,8 @@ def content_recommender(title, cosine_sim=cosine_sim, df=df, indices=indices):
 
 print(content_recommender('Emotional Intelligence'))
 
-# TODO: Group object in Clusters (UI?)
-kmeans_per_k = [MiniBatchKMeans(n_clusters=k, random_state=42).fit(cosine_sim)
+# TODO: Group object in Clusters
+kmeans_per_k = [MiniBatchKMeans(n_clusters=k, random_state=42).fit(tfidf_matrix)
                 for k in range(1, 25)]
 WCSS = [model.inertia_ for model in kmeans_per_k]
 
@@ -76,27 +73,29 @@ plt.plot(range(1, 25), WCSS)
 plt.xlabel("$k$", fontsize=14)
 plt.ylabel("WCSS", fontsize=14)
 plt.annotate('Elbow',
-             xy=(4, WCSS[3]),
+             xy=(11, WCSS[3]),
              xytext=(0.55, 0.55),
              textcoords='figure fraction',
              fontsize=16,
              arrowprops=dict(facecolor='black', shrink=0.1)
              )
-plt.axis([1, 25, 0, 100000])
+plt.axis([1, 25, 0, 6000])
 plt.show()
+from sklearn.decomposition import TruncatedSVD
 
-smaller_df = TSNE().fit_transform(PCA(n_components=2).fit_transform(cosine_sim))
+smaller_df = TSNE().fit_transform(TruncatedSVD(n_components=25, random_state=42).fit_transform(tfidf_matrix))
 print(smaller_df)
 
-k = 4
+k = 11
 kmeans = MiniBatchKMeans(n_clusters=k, random_state=42)
-y_pred = kmeans.fit_predict(cosine_sim)
+y_pred = kmeans.fit_predict(tfidf_matrix)
 
 SAVE = True
 if SAVE:
     pd.DataFrame(smaller_df).to_csv("./model/coordinates.csv")
     pd.DataFrame(y_pred).to_csv("./model/prediction.csv")
     indices.to_csv("./model/indices.csv")
+
 
 # TODO: Plot objects per cluster (UI)
 
@@ -129,13 +128,10 @@ def plot_clusters_with_target(X, target, y=None, zoom_axis=0):
     plt.annotate("Learning Object", (target[0], target[1]))
     plt.tight_layout()
     if zoom_axis != 0:  # Zoom in on object (UI)
-        plt.axis([target[0]-zoom_axis, target[0]+zoom_axis, target[1]-zoom_axis, target[1]+zoom_axis])
+        plt.axis([target[0] - zoom_axis, target[0] + zoom_axis, target[1] - zoom_axis, target[1] + zoom_axis])
     plt.show()
 
 
 target_point = get_coordinates(indices, smaller_df, 'Eager to help? ~ Share your expertise (WIP)')
 plot_clusters_with_target(smaller_df, target_point, y_pred)
 plot_clusters_with_target(smaller_df, target_point, y_pred, zoom_axis=30)
-
-
-
